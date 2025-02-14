@@ -16,6 +16,7 @@ type Usuario struct {
 	FechaRegistro time.Time `json:"fecha_registro" gorm:"default:current_timestamp"`
 	PagoMensual bool   `json:"pago_mensual" gorm:"default:false"` 
 	FechaExpiracion time.Time `json:"fecha_expiracion"`
+	IsDeleted bool   `json:"is_deleted" gorm:"default:false"` 
 
 }
 
@@ -26,9 +27,11 @@ func Migrate(db *gorm.DB) {
 }
 
 func CreateUsuario(db *gorm.DB, usuario *Usuario) error {
+
 	if usuario.PagoMensual {
 		usuario.FechaExpiracion = usuario.FechaRegistro.AddDate(0, 1, 0) // Un mes después
 	}
+
 	result := db.Create(&usuario)
 	return result.Error          
 }
@@ -49,5 +52,5 @@ func RenovarMensualidad(db *gorm.DB, usuarioID uint) error {
 		return err // Si hay un error al guardar, retorna el error
 	}
 
-	return nil // Si todo sale bien, retorna nil
+	return nil
 }

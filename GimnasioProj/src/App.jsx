@@ -1,7 +1,7 @@
 import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from '../src/assets/pages/loginPage'
-
+import Login from './assets/pages/loginPage'
+import Register from './assets/pages/registerPage'
 function App() {
   
   return (
@@ -9,6 +9,7 @@ function App() {
       <Router>
         <Routes>
           <Route path='/' element = {<Login/>} />
+          <Route path='/Registro' element = {<Register/>} />
         </Routes>
       </Router>
     </>

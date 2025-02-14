@@ -8,18 +8,13 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
-	r.POST("/usuarios", func(c *gin.Context) {
-		controllers.CreateUsuario(c, db)
-	})
-
-
-	// Ruta para renovar la mensualidad de un usuario
-	r.POST("/usuarios/:id/renovar", func(c *gin.Context) {
-		controllers.RenovarMensualidad(c,db)
-	})
-
+	
 	r.POST("/login", func(c *gin.Context) {
 		controllers.Login(c, db)
+	})
+
+	r.POST("/registro", func(c *gin.Context) {
+		controllers.CreateUsuario(c, db)
 	})
 	
 }

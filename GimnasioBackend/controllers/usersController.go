@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 	"github.com/google/uuid"
+	"fmt"
+	//"io"
 
 )
 
@@ -21,11 +23,25 @@ func genTarjetaID() string{
 func CreateUsuario(c *gin.Context, db *gorm.DB) {
 	var usuario models.Usuario
 
+	
 	// Parsear el JSON del request
 	if err := c.ShouldBindJSON(&usuario); err != nil {
+		fmt.Println("Error en el binding:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	fmt.Printf("Datos después del binding: %+v\n", usuario)
+
+
+	contraseniaGenerada := utils.GenerarContrasenia(12)
+
+	hashedPassword, err := utils.EncriptarContrasenia(contraseniaGenerada)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al encriptar la contraseña"})
+		return
+	}
+	usuario.Contrasenia = hashedPassword
 
 	// Lógica para asignar valores según el tipo de usuario
 	if usuario.TipoUsuario == 1 {
@@ -35,22 +51,17 @@ func CreateUsuario(c *gin.Context, db *gorm.DB) {
 		usuario.TarjetaID = genTarjetaID() // Función genTarjetaID() debe estar en utils o en el mismo controlador
 	}
 
-	// Encriptar la contraseña
-	hashedPassword, err := utils.EncriptarContrasenia(usuario.Contrasenia)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al encriptar la contraseña"})
-		return
-	}
-	usuario.Contrasenia = hashedPassword
+	fmt.Printf("Datos recibidos: %+v\n", usuario)
 
 	// Crear el usuario en la base de datos
 	if err := models.CreateUsuario(db, &usuario); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear el usuario"})
 		return
 	}
+	
+	go utils.EnviarCorreo(usuario.Email, "Registro exitoso", "Bienvenido " +usuario.Nombre+ "\nTu contraseña es: "+contraseniaGenerada +" \nRecuerda cambiar tu contraseña")
 
-	// Responder con el usuario creado
-	c.JSON(http.StatusCreated, usuario)
+	c.JSON(http.StatusCreated, gin.H{"message": "Usuario registrado exitosamente. Revisa tu correo para la contraseña."})
 }
 
 // Función para renovar la mensualidad de un usuario
