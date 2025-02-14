@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 import {useNavigate } from "react-router-dom"
-import { FaRegUser } from "react-icons/fa";
+import { MdAlternateEmail } from "react-icons/md";
 import { PiPasswordFill } from "react-icons/pi";
 import { Toaster, toast } from 'react-hot-toast';
 
@@ -31,11 +31,11 @@ function Login() {
             });
             console.log(email,contrasenia)
             localStorage.setItem('token', response.data.token);
-                
+           
             toast.success('¡Ingreso exitoso!', {
                     duration: 3000, 
             });
-            
+            navigate("/")
             } catch (err) {
                 setError('Correo o contraseña incorrectos');
                 toast.error('Correo o contraseña incorrectos', {
@@ -56,12 +56,12 @@ function Login() {
                                 <div className='input-container'>
                                     <input 
                                         type='text' 
-                                        placeholder='Usuario' 
+                                        placeholder='Correo' 
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
                                         />
-                                    <FaRegUser className='icon' />
+                                    <MdAlternateEmail className='icon' />
                                 </div>
                                 <div className='input-container'>
                                     <input 

@@ -8,9 +8,9 @@ import (
 	"time"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"os"
 )
 
-var jwtKey = []byte("@123")
 
 // Estructura para la solicitud de login
 type LoginRequest struct {
@@ -25,6 +25,9 @@ type LoginResponse struct {
 
 // Función para generar el JWT
 func GenerarJWT(usuario models.Usuario) string {
+	contra := os.Getenv("JWT_CONTRA")
+
+	var jwtKey = []byte(contra)
 	claims := jwt.MapClaims{
 		"id":       usuario.ID,
 		"email":    usuario.Email,
