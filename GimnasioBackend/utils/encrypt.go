@@ -12,3 +12,5 @@ func EncriptarContrasenia(contrasenia string) (string, error) {
 	}
 	return string(hashedPassword), nil
 }
+
+

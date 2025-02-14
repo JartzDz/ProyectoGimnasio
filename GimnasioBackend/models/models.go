@@ -19,26 +19,25 @@ type Usuario struct {
 
 }
 
+
 // Migrate realiza la migración de la tabla 'usuarios'
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(&Usuario{})
 }
 
-// CreateUsuario crea un nuevo usuario en la base de datos
 func CreateUsuario(db *gorm.DB, usuario *Usuario) error {
 	if usuario.PagoMensual {
-		// Si paga mensual, la fecha de expiración es 30 días después de la fecha de registro
 		usuario.FechaExpiracion = usuario.FechaRegistro.AddDate(0, 1, 0) // Un mes después
 	}
 	result := db.Create(&usuario)
-	return result.Error
+	return result.Error          
 }
 
 func RenovarMensualidad(db *gorm.DB, usuarioID uint) error {
-	// Obtener el usuario
+	// Obtener el usuario por ID
 	var usuario Usuario
 	if err := db.First(&usuario, usuarioID).Error; err != nil {
-		return err // Si no se encuentra el usuario
+		return err // Si no se encuentra el usuario, retorna el error
 	}
 
 	// Actualizar el estado del pago mensual y la fecha de expiración
@@ -47,8 +46,8 @@ func RenovarMensualidad(db *gorm.DB, usuarioID uint) error {
 
 	// Guardar los cambios en la base de datos
 	if err := db.Save(&usuario).Error; err != nil {
-		return err
+		return err // Si hay un error al guardar, retorna el error
 	}
 
-	return nil
+	return nil // Si todo sale bien, retorna nil
 }
