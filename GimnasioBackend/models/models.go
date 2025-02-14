@@ -14,6 +14,9 @@ type Usuario struct {
 	Saldo        float64   `json:"saldo" gorm:"type:decimal(10,2);default:0;check:saldo >= 0"`
 	TipoUsuario  int       `json:"tipo_usuario" gorm:"not null"`  
 	FechaRegistro time.Time `json:"fecha_registro" gorm:"default:current_timestamp"`
+	PagoMensual bool   `json:"pago_mensual" gorm:"default:false"` 
+	FechaExpiracion time.Time `json:"fecha_expiracion"`
+
 }
 
 // Migrate realiza la migración de la tabla 'usuarios'
@@ -23,6 +26,29 @@ func Migrate(db *gorm.DB) {
 
 // CreateUsuario crea un nuevo usuario en la base de datos
 func CreateUsuario(db *gorm.DB, usuario *Usuario) error {
+	if usuario.PagoMensual {
+		// Si paga mensual, la fecha de expiración es 30 días después de la fecha de registro
+		usuario.FechaExpiracion = usuario.FechaRegistro.AddDate(0, 1, 0) // Un mes después
+	}
 	result := db.Create(&usuario)
 	return result.Error
+}
+
+func RenovarMensualidad(db *gorm.DB, usuarioID uint) error {
+	// Obtener el usuario
+	var usuario Usuario
+	if err := db.First(&usuario, usuarioID).Error; err != nil {
+		return err // Si no se encuentra el usuario
+	}
+
+	// Actualizar el estado del pago mensual y la fecha de expiración
+	usuario.PagoMensual = true
+	usuario.FechaExpiracion = time.Now().AddDate(0, 1, 0) // Un mes a partir de ahora
+
+	// Guardar los cambios en la base de datos
+	if err := db.Save(&usuario).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
